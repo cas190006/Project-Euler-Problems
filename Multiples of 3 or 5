@@ -1,0 +1,35 @@
+"""
+If we list all the natural numbers below 10 that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23.
+Find the sum of all the multiples of 3 or 5 below 1000.
+
+ANSWER: 233168
+"""
+
+# Time O(n), Space O(1)
+def sumMultiplesOf3Or5Brute(n):
+    total = 0
+    
+    for i in range(3, n, 3):
+        total += i
+        
+    for i in range(5, n, 5):
+        if (i % 3 != 0):
+            total += i
+    
+    return total
+
+# Time O(1), Space O(1)
+def sumDivisibleByN(n, target):
+    end = (target-1)//n
+    return n*(end*(end+1))//2
+
+# Time O(1), Space O(1)
+def sumMultiplesOf3Or5Formula(n):
+    return sumDivisibleByN(3,n)+sumDivisibleByN(5,n)-sumDivisibleByN(15,n)
+
+
+print(sumMultiplesOf3Or5Brute(10))
+print(sumMultiplesOf3Or5Formula(10))
+
+print(sumMultiplesOf3Or5Brute(1000))
+print(sumMultiplesOf3Or5Formula(1000))
