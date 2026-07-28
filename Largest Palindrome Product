@@ -1,0 +1,76 @@
+import math
+"""
+A palindromic number reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 * 99.
+Find the largest palindrome made from the product of two 3-digit numbers.
+
+ANSWER: 906609
+"""
+
+# Time O(d * 10^(2d)), Space O(1)
+def largestNDigitPalindromeBrute(d):
+    if d <= 1:
+        return None
+    
+    largest = -math.inf
+    maxValue = 10**d - 1
+    minValue = 10**(d-1) - 1
+    
+    for i in range(maxValue,minValue,-1):
+        for j in range(maxValue,i,-1):
+            product = i*j
+            if product <= largest:
+                break
+            
+            if isPalindrome(product):
+                largest = max(largest, product)
+    
+    return largest
+
+# Time O(d), Space O(1)
+# d = digits of n
+def isPalindrome(n):
+    if n < 0 or (n % 10 == 0 and n != 0):
+        return False
+    
+    original = n
+    reversed_n = 0
+    
+    while n > 0:
+        digit = n % 10
+        reversed_n = (reversed_n * 10) + digit
+        n = n // 10
+        
+    return original == reversed_n
+
+# Time O(d * 10^(2d)), Space O(1)
+def largestNDigitPalindromeFactor11(d):
+    if d <= 1:
+        return None
+    
+    largest = -math.inf
+    maxValue = 10**d - 1
+    minValue = 10**(d-1) - 1
+    
+    for i in range(maxValue,minValue,-1):
+        if i % 11 == 0:
+            jStart = maxValue
+            jump = -1
+        else:
+            jStart = 11 * ((maxValue + 1) // 11)
+            jump = -11
+        
+        for j in range(jStart,i,jump):
+            product = i*j
+            if product <= largest:
+                break
+            if isPalindrome(product):
+                largest = max(largest, product)
+    
+    return largest
+
+
+print(largestNDigitPalindromeBrute(2))
+print(largestNDigitPalindromeFactor11(2))
+
+print(largestNDigitPalindromeBrute(3))
+print(largestNDigitPalindromeFactor11(3))
