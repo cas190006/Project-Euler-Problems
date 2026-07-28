@@ -1,0 +1,57 @@
+import math
+"""
+By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see that the 6th prime is 13.
+What is the 10,001st prime number?
+
+ANSWER: 104743
+"""
+
+# Time O((n log n)^(3/2)), Space O(1)
+def nthPrime(n):
+    if n == 1:
+        return 2
+    num = 3
+    i = 1
+    
+    while True:
+        if isPrime(num):
+            i += 1
+        
+        if i == n:
+            return num
+        num += 2
+        
+# Time O(sqrt(n)), Space O(1)
+def isPrime(n):
+    if n <= 1:
+        return False
+
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+
+# Time O(n log n log log n), Space O(n log n)
+def nthPrimeLimit(n):
+    primes = []
+    limit = int(n * math.log(n) + n * math.log(math.log(n)))
+    nums = [True] * (limit)
+    
+    for p in range(2, limit):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, limit, p):
+                nums[i] = False
+                
+        if len(primes) == n:
+            break
+
+    return primes[n-1]
+
+
+print(nthPrime(6))
+print(nthPrimeLimit(6))
+
+print(nthPrime(10001))
+print(nthPrimeLimit(10001))
