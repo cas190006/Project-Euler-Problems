@@ -1,0 +1,63 @@
+import math
+"""
+The prime factors of 13195 are 5, 7, 13 and 29.
+What is the largest prime factor of the number 600851475143?
+
+ANSWER: 6857
+"""
+
+# Time O(n), Space O(1)
+def largestPrimeFactorUsingPrime(n):
+    squareRoot = int(math.sqrt(n))
+    largest = 1
+    
+    for i in range(squareRoot, 1, -1):
+        if n % i == 0:
+            f1 = i
+            f2 = n//i
+            
+            if isPrime(f1):
+                largest = max(largest, f1)
+            
+            if isPrime(f2):
+                largest = max(largest, f2)
+    return largest
+
+# Time O(sqrt(n)), Space O(1)
+def isPrime(n):
+    if n <= 1:
+        return False
+
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+
+# Time O(sqrt(n)), Space O(1)
+def largestPrimeFactorWithoutPrime(n):
+    largest = 1
+    
+    while n % 2 == 0:
+        largest = 2
+        n //= 2
+    
+    factor = 3
+    maxFactor = int(math.sqrt(n))
+    
+    while 1 < n and factor <= maxFactor:
+        if n % factor == 0:
+            largest = factor
+            while n % factor == 0:
+                n //= factor
+            maxFactor = int(math.sqrt(n))
+        factor += 2
+    
+    if n == 1:
+        return largest
+    else:
+        return n
+
+
+print(largestPrimeFactorUsingPrime(600851475143))
+print(largestPrimeFactorWithoutPrime(600851475143))
