@@ -1,0 +1,64 @@
+import math
+"""
+Euler discovered the remarkable quadratic formula: n² + n + 41
+
+It turns out that the formula produces 40 primes for the consecutive integer values 0 ≤ n ≤ 39.
+However, when n = 40, 40² + 40 + 41 = 40(40 + 1) + 41, which is divisible by 41.
+Likewise, when n = 41, 41² + 41 + 41, is clearly divisible by 41.
+
+Another remarkable formula is: n² − 79n + 1601 was discovered, which produces 80 primes for the consecutive values 0 ≤ n ≤ 79.
+The product of the coefficients, −79 and 1601, is −126479.
+
+Consider quadratics of the form: n² + an + b, where |a| < 1000 and |b| ≤ 1000
+where |n| denotes the absolute value of n
+e.g., |11| = 11 and |-4| = 4
+
+Find the product of the coefficients, a and b, for the quadratic expression that produces the maximum number of primes for consecutive values of n, starting with n = 0.
+
+ANSWER: -59231
+"""
+
+# Time: O(B^(5/2) / log B),  Space: O(B)
+# Given B = bLimit
+def quadraticPrimesCoefficientProduct(aLimit, bLimit):
+    
+    primes = primesLessThanN(bLimit)
+    longest = 0
+    aCo = 0
+    bCo = 0
+    
+    for b in primes:
+        aStart = math.floor(math.sqrt(4*b))
+        
+        if aStart < aLimit:
+            for a in range(-1*aStart, aStart+1):
+                if a == 0:
+                    continue
+                
+                n = 0
+                result = n**2 + a*n + b
+                while result in primes:
+                    n += 1
+                    result = n**2 + a*n + b
+                
+                if longest < n+1:
+                    longest = n+1
+                    aCo = a
+                    bCo = b
+    return aCo*bCo
+                
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = set()
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.add(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+
+print(quadraticPrimesCoefficientProduct(1000, 1000))
