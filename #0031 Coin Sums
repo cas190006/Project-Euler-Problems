@@ -1,0 +1,43 @@
+"""
+In the United Kingdom the currency is made up of pound (£) and pence (p). There are eight coins in general circulation:
+1p, 2p, 5p, 10p, 20p, 50p, £1 (100p), and £2 (200p).
+
+It is possible to make £2 in the following way:
+1×£1 + 1×50p + 2×20p + 1×5p + 1×2p + 3×1p
+
+How many different ways can £2 be made using any number of coins?
+
+ANSWER: 73682
+"""
+
+# Time: O(2^(T + m)),  Space: O(T + m)
+# Given T = target, m = len(coins)
+def coinsCombTargetRecursive(coins, target, index=0):
+    if target == 0:
+        return 1
+    if target < 0 or index == len(coins):
+        return 0
+    
+    combs = coinsCombTargetRecursive(coins, target - coins[index], index)
+    combs += coinsCombTargetRecursive(coins, target, index+1)
+    
+    return combs
+
+# Time: O(T * m),  Space: O(T)
+# Given T = target, m = len(coins)
+def coinsCombTargetAmounts(coins, target):
+    amountCombs = [0] * (target+1)
+    amountCombs[0] = 1
+
+    for coin in coins:
+        for amount in range(coin, target+1):
+            amountCombs[amount] += amountCombs[amount - coin]
+
+    return amountCombs[target]
+
+
+# 1p, 2p, 5p, 10p, 20p, 50p, £1 (100p), and £2 (200p).
+ukCoins = [1, 2, 5, 10, 20, 50, 100, 200]
+
+print(coinsCombTargetRecursive(ukCoins, 200))
+print(coinsCombTargetAmounts(ukCoins, 200))
