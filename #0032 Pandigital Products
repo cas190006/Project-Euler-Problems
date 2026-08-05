@@ -1,0 +1,62 @@
+"""
+We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once. For example, the 5-digit number 15234 is 1 through 5 pandigital.
+
+The product 7254 is unusual because the identity, 39 × 186 = 7254 contains the multiplicand, multiplier, and product, and together they use each of the digits 1 through 9 exactly once.
+
+Find the sum of all products whose multiplicand/multiplier/product identity can be written as a 1 through 9 pandigital.
+
+Hint: Some products can be obtained in more than one way, so be sure to include each product only once in the final sum.
+
+ANSWER: 45228
+"""
+
+# Time: O(1),  Space: O(1)
+def ninthDigitPandigitalProductSum():
+    products = set()
+    
+    for multiplicand in range(1, 98):
+        if multiplicand % 11 == 0:
+            continue
+        
+        for multiplier in range(9876 // multiplicand, multiplicand, -1):
+            product = multiplicand * multiplier
+            digitStr = str(multiplicand) + str(multiplier) + str(product)
+            
+            if len(digitStr) < 9:
+                break
+            
+            if '0' not in digitStr and len(set(digitStr)) == 9:
+                products.add(product)
+                
+    return sum(products)
+
+# Time: O(1),  Space: O(1)
+def pandigitalProductSum(n):
+    if n <= 3 or 9 < n:
+        return 0
+    
+    digits = set("123456789"[:n])
+    products = set()
+    
+    limit = int("".join(str(i) for i in range(n, n - n // 2, -1)))
+    multiplicandLimit = int("".join(str(i) for i in range(n, n-2, -1)))
+
+    for multiplicand in range(1, multiplicandLimit):
+        if multiplicand % 11 == 0:
+            continue
+        
+        for multiplier in range(limit // multiplicand, multiplicand, -1):
+            product = multiplicand * multiplier
+            digitStr = str(multiplicand) + str(multiplier) + str(product)
+            
+            if len(digitStr) < n:
+                break
+            
+            if len(digitStr) == n and set(digitStr) == digits:
+                products.add(product)
+
+    return sum(products)
+
+
+print(ninthDigitPandigitalProductSum())
+print(pandigitalProductSum(9))
