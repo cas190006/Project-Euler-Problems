@@ -1,0 +1,75 @@
+"""
+The number, 197, is called a circular prime because all rotations of the digits: 197, 971, and 719, are themselves prime.
+T
+here are thirteen such primes below 100: 2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97.
+
+How many circular primes are there below one million?
+
+ANSWER: 55
+"""
+
+# Time: O(N log N), Space: O(N)
+# Given N = 10 ** len(str(n - 1))
+def circularPrimeCount(n):
+    primes = primesLessThanN(10 ** len(str(n - 1)))
+    circularPrimes = set()
+    
+    for prime in sorted(primes):
+        if n <= prime:
+            break
+        
+        if prime in circularPrimes or (prime > 10 and any(d in "024568" for d in str(prime))):
+            continue
+        
+        circulars = circularNumbers(prime)
+        
+        if all(circular in primes for circular in circulars):
+            for circular in circulars:
+                if circular in primes and circular not in circularPrimes and circular < n:
+                    circularPrimes.add(circular)
+                        
+    return len(circularPrimes)
+
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = set()
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.add(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+# Time: O(d), Space: O(d)
+# Given d digits in n
+def circularNumbers(n):
+    circular = set()
+    circular.add(n)
+    
+    if n < 10:
+        return circular
+    
+    num = n
+    digitCount = 0
+    
+    while num:
+        digitCount += 1
+        num //= 10
+        
+    power = (10 ** (digitCount - 1))
+    
+    num = n
+    for i in range(digitCount):
+        remaining = num % 10
+        dividor = num // 10
+        num = power * remaining + dividor
+        circular.add(num)
+    
+    return circular
+
+
+print(circularPrimeCount(100))
+print(circularPrimeCount(1000000))
