@@ -1,0 +1,55 @@
+"""
+The number 3797 has an interesting property.
+Being prime itself, it is possible to continuously remove digits from left to right, and remain prime at each stage: 3797, 797, 97, and 7.
+Similarly we can work from right to left: 3797, 379, 37, and 3.
+
+Find the sum of the only eleven primes that are both truncatable from left to right and right to left.
+
+NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
+
+ANSWER: 748317
+"""
+
+# Time: O(1), Space: O(1)
+def truncatablePrimeSum():
+    total = 0
+    primes = primesLessThanN(1000000)
+    
+    for prime in primes:
+        if prime < 10 or any(d in "468" for d in str(prime)):
+            continue
+        
+        isTruncatable = True
+        left = prime
+        right = prime
+        divisor = 10 ** (len(str(prime)) - 1)
+        
+        while left and right:
+            if left not in primes or right not in primes:
+                isTruncatable = False
+                break
+            
+            left %= divisor
+            divisor //= 10
+            right = right // 10
+        
+        if isTruncatable:
+            total += prime
+        
+    return total
+
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = set()
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.add(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+
+print(truncatablePrimeSum())
