@@ -1,0 +1,90 @@
+import math
+"""
+If p is the perimeter of a right angle triangle with integral length sides, {a, b, c}, there are exactly three solutions for p = 120.
+{20,48,52}, {24,45,51}, {30,40,50}
+
+For which value of p ≤ 1000, is the number of solutions maximised?
+
+ANSWER: 840
+"""
+
+# Time: O(n^3), Space: O(1)
+def maximisedIntegerRightTrianglesBrute(n):
+    maximisedP = 0
+    maximisedSolutionCount = 0
+    
+    for p in range(5, n+1):
+        solutionCount = 0
+        for a in range(3, ((p-3) // 3) + 1):
+            for b in range(a+1, ((p-1-a) // 2) + 1):
+                c = p - a - b
+            
+                if (a*a + b*b) == c*c:
+                    solutionCount += 1
+                    
+        if maximisedSolutionCount < solutionCount:
+            maximisedP = p
+            maximisedSolutionCount = solutionCount
+    
+    return maximisedP
+
+# Time: O(n^2), Space: O(1)
+def maximisedIntegerRightTrianglesEquation(n):
+    maximisedP = 0
+    maximisedSolutionCount = 0
+    
+    for p in range(5, n+1):
+        solutionCount = 0
+        for a in range(3, ((p-3) // 3) + 1):
+            b = (p**2 - (2*p*a)) // (2*(p-a))
+            c = p - a - b
+            
+            if (a*a + b*b) == c*c:
+                solutionCount += 1
+
+        if maximisedSolutionCount < solutionCount:
+            maximisedP = p
+            maximisedSolutionCount = solutionCount
+    
+    return maximisedP
+
+# Time: O(n log n), Space: O(1)
+def maximisedIntegerRightTrianglesKnownTriples(n):
+    perimeterSolutions = [0] * (n+1)
+    triples = primitivePythagoreanTriples(n)
+    
+    for triple in triples:
+        perimeter = sum(triple)
+        
+        for i in range(1, n//perimeter + 1):
+            perimeterSolutions[perimeter*i] += 1
+    
+    return perimeterSolutions.index(max(perimeterSolutions))
+
+# Time: O(perimeter), Space: O(perimeter)
+def primitivePythagoreanTriples(perimeter):
+    triples = set()
+
+    m = 2
+    while 2 * m * (m + 1) <= perimeter:
+        for n in range(1, m):
+            newPerimeter = 2 * m * (m + n)
+
+            if newPerimeter > perimeter:
+                break
+
+            if (m - n) % 2 == 1 and math.gcd(m, n) == 1:
+                a = m * m - n * n
+                b = 2 * m * n
+                c = m * m + n * n
+
+                triples.add((a, b, c))
+
+        m += 1
+
+    return triples
+
+
+print(maximisedIntegerRightTrianglesBrute(1000))
+print(maximisedIntegerRightTrianglesEquation(1000))
+print(maximisedIntegerRightTrianglesKnownTriples(1000))
