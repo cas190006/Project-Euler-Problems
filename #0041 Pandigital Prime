@@ -1,0 +1,35 @@
+"""
+We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once. For example, 2143 is a 4-digit pandigital and is also prime.
+
+What is the largest n-digit pandigital prime that exists?
+
+ANSWER: 7652413
+"""
+
+# Time: O(1), Space: O(1)
+def largestNDigitPandigitalPrime():
+    limit = 987654321
+    primes = primesLessThanN(limit+1)
+    
+    for prime in reversed(sorted(primes)):
+        length = len(str(prime))
+        digits = set("123456789"[:length])
+        
+        if set(str(prime)) == digits:
+            return prime
+        
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = set()
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.add(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+    
+    
+print(largestNDigitPandigitalPrime())
