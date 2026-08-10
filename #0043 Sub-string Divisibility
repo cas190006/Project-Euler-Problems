@@ -1,0 +1,87 @@
+import itertools
+"""
+The number, 1406357289, is a 0 to 9 pandigital number because it is made up of each of the digits 0 to 9 in some order, but it also has a rather interesting sub-string divisibility property.
+
+Let d₁ be the 1st digit, d₂ be the 2nd digit, and so on. In this way, we note the following:
+
+• d₂d₃d₄ = 406 is divisible by 2
+• d₃d₄d₅ = 063 is divisible by 3
+• d₄d₅d₆ = 635 is divisible by 5
+• d₅d₆d₇ = 357 is divisible by 7
+• d₆d₇d₈ = 572 is divisible by 11
+• d₇d₈d₉ = 728 is divisible by 13
+• d₈d₉d₁₀ = 289 is divisible by 17
+
+Find the sum of all 0 to 9 pandigital numbers with this property.
+
+ANSWER: 16695334890
+"""
+
+# Time: O(1),  Space: O(1)
+def substringDivisibilityBrute():
+    primes = [2, 3, 5, 7, 11, 13, 17]
+    total = 0
+    
+    for premutation in itertools.permutations(range(10)):
+        num = int("".join(map(str, premutation)))
+        isProperty = True
+        
+        for i in range(1, 8):
+            substring = str(num)[i:i+3]
+            
+            if int(substring) % primes[i-1] != 0:
+                isProperty = False
+                break
+                
+        if isProperty:
+            total += num
+        
+    return total
+
+# Time: O(1),  Space: O(1)
+def substringDivisibilityConstructive():
+    digits = set("0123456789")
+    total = 0
+
+    for i in range(1, 10):
+        remainingDigits = digits - {str(i)}
+        evenNums = [
+            "".join(p)
+            for p in itertools.permutations(remainingDigits, 3)
+            if p[-1] in "02468"
+        ]
+
+        for num1 in evenNums:
+            remainingDigits2 = remainingDigits - set(num1)
+            sevenNums = [
+                "".join(p)
+                for p in itertools.permutations(remainingDigits2, 3)
+                if int("".join(p)) % 7 == 0
+            ]
+
+            for num2 in sevenNums:
+                numStr = str(i) + num1 + num2
+
+                if int(numStr[2:5]) % 3 != 0 or int(numStr[3:6]) % 5 != 0:
+                    continue
+
+                remainingDigits3 = remainingDigits2 - set(num2)
+                seventeenNums = [
+                    "".join(p)
+                    for p in itertools.permutations(remainingDigits3, 3)
+                    if int("".join(p)) % 17 == 0
+                ]
+
+                for num3 in seventeenNums:
+                    numStr = str(i) + num1 + num2 + num3
+
+                    if int(numStr[5:8]) % 11 != 0 or int(numStr[6:9]) % 13 != 0:
+                        continue
+
+                    total += int(numStr)
+
+    return total
+
+
+print(substringDivisibilityBrute())
+print(substringDivisibilityConstructive())
