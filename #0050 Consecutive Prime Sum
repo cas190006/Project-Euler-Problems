@@ -1,0 +1,163 @@
+"""
+The prime 41 can be written as the sum of six consecutive primes:
+41 = 2 + 3 + 5 + 7 + 11 + 13.
+
+This is the longest sum of consecutive primes that adds to a prime below one-hundred.
+
+The longest sum of consecutive primes below one-thousand that adds to a prime contains 21 terms, and is equal to 953.
+
+Which prime, below one-million, can be written as the sum of the most consecutive primes?
+
+ANSWER: 997651
+"""
+
+# Time: O(n^3), Space: O(n)
+def consecutivePrimeSum(n):
+    primes = primesLessThanN(n)
+    prime = 0
+    primeTerms = 0
+    
+    for i in range(len(primes)):
+        for j in range(i + primeTerms + 1, len(primes)):
+            subPrimes = primes[i:j+1]
+            primeSum = sum(subPrimes)
+            
+            if primeSum >= n:
+                break
+            
+            if primeSum in primes:
+                prime = primeSum
+                primeTerms = len(subPrimes)
+            
+    return prime
+    
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = []
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+# Time: O(n^2), Space: O(n)
+def consecutivePrimeSumCumulative(n):
+    primes = primesLessThanN(n)
+    primeSet = set(primes)
+
+    cumulativeSums = [0]
+
+    for p in primes:
+        cumulativeSums.append(cumulativeSums[-1] + p)
+
+    prime = 0
+    primeTerms = 0
+    
+    for i in range(len(cumulativeSums)-1):
+        for j in range(i + primeTerms + 1, len(cumulativeSums)):
+
+            primeSum = cumulativeSums[j] - cumulativeSums[i]
+
+            if primeSum >= n:
+                break
+
+            if primeSum in primeSet:
+                primeTerms = j - i
+                prime = primeSum
+
+    return prime
+    
+
+print(consecutivePrimeSum(100))
+print(consecutivePrimeSumCumulative(100))
+
+print(consecutivePrimeSum(1000))
+print(consecutivePrimeSumCumulative(1000))
+
+print(consecutivePrimeSum(1000000))
+print(consecutivePrimeSumCumulative(1000000))"""
+The prime 41 can be written as the sum of six consecutive primes:
+41 = 2 + 3 + 5 + 7 + 11 + 13.
+
+This is the longest sum of consecutive primes that adds to a prime below one-hundred.
+
+The longest sum of consecutive primes below one-thousand that adds to a prime contains 21 terms, and is equal to 953.
+
+Which prime, below one-million, can be written as the sum of the most consecutive primes?
+
+ANSWER: 997651
+"""
+
+# Time: O(n^3), Space: O(n)
+def consecutivePrimeSum(n):
+    primes = primesLessThanN(n)
+    prime = 0
+    primeTerms = 0
+    
+    for i in range(len(primes)):
+        for j in range(i + primeTerms + 1, len(primes)):
+            subPrimes = primes[i:j+1]
+            primeSum = sum(subPrimes)
+            
+            if primeSum >= n:
+                break
+            
+            if primeSum in primes:
+                prime = primeSum
+                primeTerms = len(subPrimes)
+            
+    return prime
+    
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = []
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+# Time: O(n^2), Space: O(n)
+def consecutivePrimeSumCumulative(n):
+    primes = primesLessThanN(n)
+    primeSet = set(primes)
+
+    cumulativeSums = [0]
+
+    for p in primes:
+        cumulativeSums.append(cumulativeSums[-1] + p)
+
+    prime = 0
+    primeTerms = 0
+    
+    for i in range(len(cumulativeSums)-1):
+        for j in range(i + primeTerms + 1, len(cumulativeSums)):
+
+            primeSum = cumulativeSums[j] - cumulativeSums[i]
+
+            if primeSum >= n:
+                break
+
+            if primeSum in primeSet:
+                primeTerms = j - i
+                prime = primeSum
+
+    return prime
+    
+
+print(consecutivePrimeSum(100))
+print(consecutivePrimeSumCumulative(100))
+
+print(consecutivePrimeSum(1000))
+print(consecutivePrimeSumCumulative(1000))
+
+print(consecutivePrimeSum(1000000))
+print(consecutivePrimeSumCumulative(1000000))
