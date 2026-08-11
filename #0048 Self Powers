@@ -1,0 +1,43 @@
+"""
+The series, 1¹ + 2² + 3³ + ⋯ + 10¹⁰ = 10405071317.
+
+Find the last ten digits of the series, 1¹ + 2² + 3³ + ⋯ + 1000¹⁰⁰⁰.
+
+ANSWER: 9110846700
+"""
+
+# Time: O(n), Space: O(1)
+def selfPowersBrute(n, last):
+    if last < 1:
+        return None
+    
+    if n < 1:
+        return 0
+    
+    total = 0
+    
+    for i in range(1, n+1):
+        total += i ** i
+        
+    length = len(str(total))
+    return str(total)[length-last:length]
+
+# Time: O(n), Space: O(1)
+def selfPowerLastDigits(n, last):
+    if last < 1:
+        return None
+    
+    if n < 1:
+        return 0
+
+    MOD = 10**last
+    total = 0
+
+    for i in range(1, n + 1):
+        total = (total + pow(i, i, MOD)) % MOD
+
+    return total
+
+
+print(selfPowersBrute(1000, 10))
+print(selfPowerLastDigits(1000, 10))
