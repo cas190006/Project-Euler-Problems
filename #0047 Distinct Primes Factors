@@ -1,0 +1,68 @@
+"""
+The first two consecutive numbers to have two distinct prime factors are:
+14 = 2 × 7
+15 = 3 × 5
+
+The first three consecutive numbers to have three distinct prime factors are:
+644 = 2² × 7 × 23
+645 = 3 × 5 × 43
+646 = 2 × 17 × 19
+
+Find the first four consecutive integers to have four distinct prime factors each. What is the first of these numbers?
+
+ANSWER: 134043
+"""
+
+# Time: O(M^(3/2)), Space: O(c)
+# Given M is the largest number tested
+def consecutiveNumbersDistinctPrimeFactors(c, d):
+    if c < 1 or (c >= 5 and d == 1):
+        return None
+    
+    consecutiveNumbers = []
+    num = 2
+
+    while True:
+        if distinctPrimes(num) == d:
+            if len(consecutiveNumbers) == 0:
+                consecutiveNumbers.append(num)
+                if c == 1:
+                    return consecutiveNumbers
+            else:
+                if consecutiveNumbers[-1] == num-1:
+                    consecutiveNumbers.append(num)
+                    if len(consecutiveNumbers) == c:
+                        return consecutiveNumbers
+                else:
+                    consecutiveNumbers = [num]
+
+        num += 1
+
+# Time O(sqrt(n)), Space O(1)
+def distinctPrimes(n):
+    count = 0
+    
+    if n % 2 == 0:
+        count += 1
+        while n % 2 == 0:
+            n //= 2
+        
+    factor = 3
+
+    while factor * factor <= n:
+        if n % factor == 0:
+            count += 1
+            while n % factor == 0:
+                n //= factor
+
+        factor += 2
+
+    if n > 1:
+        count += 1
+    
+    return count
+
+        
+print(consecutiveNumbersDistinctPrimeFactors(2,2))
+print(consecutiveNumbersDistinctPrimeFactors(3,3))
+print(consecutiveNumbersDistinctPrimeFactors(4,4))
