@@ -1,0 +1,82 @@
+"""
+By replacing the 1st digit of the 2-digit number *3, it turns out that six of the nine possible values:
+13, 23, 43, 53, 73, and 83, are all prime.
+
+By replacing the 3rd and 4th digits of 56**3 with the same digit, this 5-digit number is the first example having seven primes among the ten generated numbers, yielding the family:
+56003, 56113, 56333, 56443, 56663, 56773, and 56993.
+Consequently 56003, being the first member of this family, is the smallest prime with this property.
+
+Find the smallest prime which, by replacing part of the number (not necessarily adjacent digits) with the same digit, is part of an eight prime value family.
+
+ANSWER: 121313
+"""
+
+# Time: O(n log log n), Space: O(n)
+def smallestPrimeDigitReplacementNFamily(n):
+    if n < 1 or n > 8:
+        return None
+    
+    primes = primesLessThanN(1000000)
+    primeSet = set(primes)
+    patterns = set()
+    
+    for prime in primes:
+        primeStr = str(prime)
+        primeDigits = set(primeStr)
+        
+        if len(primeStr) == 1 or len(primeDigits) == 1:
+            continue
+        
+        for digit in primeDigits:
+            pattern = primeStr.replace(digit, "*")
+            
+            if pattern not in patterns:
+                patterns.add(pattern)
+            else:
+                continue
+            
+            primeCount = 0
+            notPrimeCount = 0
+                
+            search = set('0123456789')
+                
+            if primeStr[0] == digit:
+                search -= set('0')
+                
+            if primeStr[-1] == digit:
+                search -= set('24568')
+                
+            if len(search) < n:
+                continue
+            
+            for d in search:
+                newPrime = primeStr.replace(digit, d)
+                
+                if int(newPrime) in primeSet:
+                    primeCount += 1
+                else:
+                    notPrimeCount += 1
+                    
+                if notPrimeCount > len(search)-n:
+                    break
+            
+            if primeCount >= n:
+                return prime
+
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = []
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+
+print(smallestPrimeDigitReplacementNFamily(6))
+print(smallestPrimeDigitReplacementNFamily(7))
+print(smallestPrimeDigitReplacementNFamily(8))
