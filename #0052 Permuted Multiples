@@ -1,0 +1,32 @@
+"""
+It can be seen that the number, 125874, and its double, 251748, contain exactly the same digits, but in a different order.
+
+Find the smallest positive integer, x, such that 2x, 3x, 4x, 5x, and 6x, contain the same digits.
+
+ANSWER: 142857
+"""
+
+# Time: O(N * n), Space: O(1)
+# Given N is the number of candidates tested
+def permutedMultiples(n):
+    num = 1
+    
+    while True:
+        digits = set(str(num))
+        sameDigits = True
+        
+        for x in range(2, n+1):
+            newNum = x*num
+            newDigits = set(str(newNum))
+            
+            if len(digits) < len(newDigits) or digits != newDigits:
+                sameDigits = False
+                break
+            
+        if sameDigits:
+            return num
+        
+        num += 1
+
+
+print(permutedMultiples(6))
