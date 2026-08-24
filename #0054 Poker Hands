@@ -1,0 +1,293 @@
+from collections import Counter
+"""
+In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
+
+High Card: Highest value card.
+One Pair: Two cards of the same value.
+Two Pairs: Two different pairs.
+Three of a Kind: Three cards of the same value.
+Straight: All cards are consecutive values.
+Flush: All cards of the same suit.
+Full House: Three of a kind and a pair.
+Four of a Kind: Four cards of the same value.
+Straight Flush: All cards are consecutive values of same suit.
+Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.
+
+The cards are valued in the order:
+2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.
+
+If two players have the same ranked hands then the rank made up of the highest value wins;
+for example, a pair of eights beats a pair of fives (see example 1 below).
+
+But if two ranks tie, for example, both players have a pair of queens, then highest cards in each hand are compared (see example 4 below);
+if the highest cards tie then the next highest cards are compared, and so on.
+
+Consider the following five hands dealt to two players:
+
+Player 1: 5H 5C 6S 7S KD — Pair of Fives
+Player 2: 2C 3S 8S 8D TD — Pair of Eights
+Winner: Player 2
+
+Player 1: 5D 8C 9S JS AC — Highest card Ace
+Player 2: 2C 5C 7D 8S QH — Highest card Queen
+Winner: Player 1
+
+Player 1: 2D 9C AS AH AC — Three Aces
+Player 2: 3D 6D 7D TD QD — Flush with Diamonds
+Winner: Player 2
+
+Player 1: 4D 6S 9H QH QC — Pair of Queens, Highest card Nine
+Player 2: 3D 6D 7H QD QS — Pair of Queens, Highest card Seven
+Winner: Player 1
+
+Player 1: 2H 2D 4C 4D 4S — Full House with Three Fours
+Player 2: 3C 3D 3S 9S 9D — Full House with Three Threes
+Winner: Player 1
+
+The file, poker.txt, contains one-thousand random hands dealt to two players.
+Each line of the file contains ten cards (separated by a single space): the first five are Player 1's cards and the last five are Player 2's cards.
+You can assume that all hands are valid (no invalid characters or repeated cards), each player's hand is in no specific order, and in each hand there is a clear winner.
+
+How many hands does Player 1 win?
+
+ANSWER: 376
+"""
+
+cardValue = {
+    '2': 1,
+    '3': 2,
+    '4': 3,
+    '5': 4,
+    '6': 5,
+    '7': 6,
+    '8': 7,
+    '9': 8,
+    'T': 9,
+    'J': 10,
+    'Q': 11,
+    'K': 12,
+    'A': 13
+}
+
+handValue = {
+    'High Card': 1,
+    'One Pair': 2,
+    'Two Pairs': 3,
+    'Three of a Kind': 4,
+    'Straight': 5,
+    'Flush': 6,
+    'Full House': 7,
+    'Four of a Kind': 8,
+    'Straight Flush': 9,
+    'Royal Flush': 10
+}
+
+# Time: O(n), Space: O(1)
+# Given n pokerHands
+def pokerGameResults(pokerHands, v):
+    player1Wins = 0
+    player2Wins = 0
+    
+    for hand in pokerHands:
+        if v == 1:
+            player1Hand = reviewHand(hand[0])
+            player2Hand = reviewHand(hand[1])
+        else:
+            player1Hand = betterReviewHand(hand[0])
+            player2Hand = betterReviewHand(hand[1])
+        
+        if handValue[player1Hand[0]] > handValue[player2Hand[0]]:
+            player1Wins += 1
+        elif handValue[player1Hand[0]] < handValue[player2Hand[0]]:
+            player2Wins += 1
+        else:
+            for i in range(len(player1Hand[1])):
+                if cardValue[player1Hand[1][i]] > cardValue[player2Hand[1][i]]:
+                    player1Wins += 1
+                    break
+                elif cardValue[player1Hand[1][i]] < cardValue[player2Hand[1][i]]:
+                    player2Wins += 1
+                    break
+    
+    return (player1Wins, player2Wins)
+
+# Time: O(1), Space: O(1)
+def reviewHand(hand):
+    ranks = {card[0] for card in hand}
+    rankList = [card[0] for card in hand]
+    rankCounts = Counter(rankList)
+    rankSorted = [item[0] for item in rankCounts.most_common()]
+    suits = {card[1] for card in hand}
+    values = {cardValue[card[0]] for card in hand}
+    
+    # Royal Flush
+    isRoyalFlush = True
+    
+    if ranks != set('TJQKA') or len(suits) > 1:
+        isRoyalFlush = False
+        
+    if isRoyalFlush:
+        return ('Royal Flush')
+    
+    #Straight Flush
+    isStraightFlush = True
+    
+    if max(values) - min(values) + 1 != len(values) or len(values) != 5 or len(suits) > 1:
+        isStraightFlush = False
+    
+    if isStraightFlush:
+        hightest = list(cardValue.keys())[list(cardValue.values()).index(max(values))]
+        return ('Straight Flush', [hightest])
+    
+    # Four of a Kind
+    isFourKind = True
+    
+    if len(ranks) > 2 or 4 not in rankCounts.values():
+        isFourKind = False
+    
+    if isFourKind:
+        return ('Four of a Kind', rankSorted)
+    
+    # Full House
+    isFullHouse = True
+    
+    if len(ranks) > 2 or (3 not in rankCounts.values() and 2 not in rankCounts.values()):
+        isFullHouse = False
+        
+    if isFullHouse:
+        return ('Full House', rankSorted)
+    
+    # Flush
+    isFlush = True
+    
+    if len(suits) > 1:
+        isFlush = False
+    
+    if isFlush:
+        return ('Flush', sorted(rankList, key=cardValue.get, reverse=True))
+    
+    # Straight
+    isStraight = True
+    
+    if max(values) - min(values) + 1 != len(values) or len(values) != 5:
+        isStraight = False
+        
+    if isStraight:
+        hightest = list(cardValue.keys())[list(cardValue.values()).index(max(values))]
+        return ('Straight', hightest)
+    
+    #Three of a Kind
+    isThreeKind = True
+    
+    if len(values) > 3 or 3 not in rankCounts.values():
+        isThreeKind = False
+            
+    if isThreeKind:
+        return ('Three of a Kind', rankSorted)
+    
+    # Two Pairs
+    isTwoPairs = True
+    
+    if len(values) > 3 or (2 not in rankCounts.values() and 1 not in rankCounts.values()):
+        isTwoPairs = False
+    
+    if isTwoPairs:
+        
+        if cardValue[rankSorted[0]] < cardValue[rankSorted[1]]:
+            item = rankSorted[0]
+            rankSorted[0] = rankSorted[1]
+            rankSorted[1] = item
+        
+        return ('Two Pairs', rankSorted)
+    
+    # One Pair
+    isOnePair = True
+    
+    if len(values) > 4 or 2 not in rankCounts.values():
+        isOnePair = False
+    
+    if isOnePair:
+        return ('One Pair', [rankSorted[0]] + sorted(rankSorted[1:], key=cardValue.get, reverse=True))
+    
+    return ('High Card', sorted(rankList, key=cardValue.get, reverse=True))
+
+# Time: O(1), Space: O(1)
+def betterReviewHand(hand):
+    ranks = [card[0] for card in hand]
+    suits = [card[1] for card in hand]
+
+    rankCounts = Counter(ranks)
+    countPattern = sorted(rankCounts.values(), reverse=True)
+
+    values = sorted(cardValue[r] for r in ranks)
+    uniqueValues = sorted(set(values))
+    
+    isSameSuit = len(set(suits)) == 1
+    
+    isConsecutive = False
+    if len(uniqueValues) == 5 and uniqueValues[-1] - uniqueValues[0] == 4:
+        isConsecutive = True
+        hightest = uniqueValues[-1]
+    
+    # Royal Flush
+    if isSameSuit and ranks == set('TJQKA'):
+        return ('Royal Flush')
+    
+    #Straight Flush
+    if isSameSuit and isConsecutive:
+        return ('Straight Flush', [hightest])
+    
+    # Four of a Kind
+    if countPattern == [4, 1]:
+        four = max(rankCounts, key=lambda r: rankCounts[r] == 4)
+        extra = max((r for r in ranks if rankCounts[r] == 1), key=cardValue.get)
+        
+        return ("Four of a Kind", [four, extra])
+    
+    # Full House
+    if countPattern == [3, 2]:
+        three = max((r for r in ranks if rankCounts[r] == 3), key=cardValue.get)
+        pair =  max((r for r in ranks if rankCounts[r] == 2), key=cardValue.get)
+        
+        return ('Full House', [three, pair])
+    
+    # Flush
+    if isSameSuit:
+        return ('Flush', sorted(ranks, key=cardValue.get, reverse=True))
+    
+    # Straight
+    if isConsecutive:
+        return ('Straight', hightest)
+    
+    #Three of a Kind
+    if countPattern == [3, 1, 1]:
+        three = max((r for r in ranks if rankCounts[r] == 3), key=cardValue.get)
+        extras = sorted((r for r in ranks if rankCounts[r] == 1), key=cardValue.get, reverse=True)
+        
+        return ('Three of a Kind', [three] + extras)
+    
+    # Two Pairs
+    if countPattern == [2, 2, 1]:
+        pairs = sorted((r for r in ranks if rankCounts[r] == 2), key=cardValue.get, reverse=True)
+        extra = max((r for r in ranks if rankCounts[r] == 1), key=cardValue.get)
+        
+        return ('Two Pairs', pairs + [extra])
+    
+    # One Pair
+    if countPattern == [2, 1, 1, 1]:
+        pair =  max((r for r in ranks if rankCounts[r] == 2), key=cardValue.get)
+        extras = sorted((r for r in ranks if rankCounts[r] == 1), key=cardValue.get, reverse=True)
+        
+        return ('One Pair', [pair] + extras)
+    
+    return ('High Card', sorted(ranks, key=cardValue.get, reverse=True))
+
+
+with open("poker.txt", "r") as file:
+    pokerHands = [
+        (line.split()[:5], line.split()[5:])
+        for line in file
+    ]
+    
+print(pokerGameResults(pokerHands, 1))
+print(pokerGameResults(pokerHands, 2))
