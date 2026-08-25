@@ -1,0 +1,92 @@
+"""
+If we take 47, reverse and add, 47 + 74 = 121, which is palindromic.
+Not all numbers produce palindromes so quickly. For example,
+
+349 + 943 = 1292
+1292 + 2921 = 4213
+4213 + 3124 = 7337
+
+That is, 349 took three iterations to arrive at a palindrome.
+
+Although no one has proved it yet, it is thought that some numbers, like 196, never produce a palindrome.
+A number that never forms a palindrome through the reverse and add process is called a Lychrel number.
+Due to the theoretical nature of these numbers, and for the purpose of this problem, we shall assume that a number is Lychrel until proven otherwise.
+
+In addition, you are given that for every number below ten-thousand, it will either:
+Become a palindrome in less than fifty iterations, or
+No one, with all the computing power that exists, has managed so far to map it to a palindrome.
+In fact, 10677 is the first number to be shown to require over fifty iterations before producing a palindrome:
+4668731596684224866951378664
+
+This takes 53 iterations and produces a 28-digit number.
+
+Surprisingly, there are palindromic numbers that are themselves Lychrel numbers; the first example is 4994.
+
+How many Lychrel numbers are there below ten-thousand?
+
+ANSWER: 249
+"""
+
+# Time O(n*d), Space O(d)
+# Given d digits of n
+def lychrelNumbersBelow(n):
+    lychrels = n-1
+    
+    for i in range(1, n):
+        num = i
+        for _ in range(50):
+            reverse = int(str(num)[::-1])
+            num += reverse
+            
+            if isPalindrome(num):
+                lychrels -= 1
+                break
+            
+    return lychrels
+
+# Time O(d), Space O(1)
+# Given d digits of n
+def isPalindrome(n):
+    if n < 0 or (n % 10 == 0 and n != 0):
+        return False
+    
+    original = n
+    reversed_n = 0
+    
+    while n > 0:
+        digit = n % 10
+        reversed_n = (reversed_n * 10) + digit
+        n = n // 10
+        
+    return original == reversed_n
+
+# Time O(n*d), Space O(n)
+# Given d digits of n
+def lychrelNumbersBelowStored(n):
+    lychrels = n - 1
+    nonLychrels = set()
+
+    for i in range(1, n):
+        num = i
+        sequence = []
+
+        for _ in range(50):
+            if num in nonLychrels:
+                break
+
+            sequence.append(num)
+            num += int(str(num)[::-1])
+
+            if isPalindrome(num):
+                break
+        else:
+            continue
+
+        nonLychrels.update(sequence)
+        lychrels -= 1
+
+    return lychrels
+
+
+print(lychrelNumbersBelow(10000))
+print(lychrelNumbersBelowStored(10000))
