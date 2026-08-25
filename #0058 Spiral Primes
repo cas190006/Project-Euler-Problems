@@ -1,0 +1,91 @@
+import math
+"""
+Starting with 1 and spiralling anticlockwise in the following way, a square spiral with side length 7 is formed.
+
+37 36 35 34 33 32 31
+38 17 16 15 14 13 30
+39 18  5  4  3 12 29
+40 19  6  1  2 11 28
+41 20  7  8  9 10 27
+42 21 22 23 24 25 26
+43 44 45 46 47 48 49
+
+The odd squares lie along the bottom-right diagonal.
+More interestingly, 8 out of the 13 numbers lying along both diagonals are prime; that is, a ratio of 8/13 ≈ 62%.
+
+If one complete new layer is wrapped around the spiral above, a square spiral with side length 9 will be formed.
+If this process is continued, what is the side length of the square spiral for which the ratio of primes along both diagonals first falls below 10%?
+
+ANSWER: 26241
+"""
+
+# Time: O(L^2),  Space: O(1)
+# Given L is the number of spiral layers examined
+def spiralPrimeRatioCorners(n):
+    if n <= 0 or 1 <= n:
+        return None
+    
+    total = 1
+    spiralPrimes = 0
+
+    num = 1
+    step = 2
+
+    while True:
+        for _ in range(4):
+            num += step
+
+            if isPrime(num):
+                spiralPrimes += 1
+
+            total += 1
+
+        if spiralPrimes / total < n:
+            return step + 1
+
+        step += 2
+        
+# Time O(sqrt(n)), Space O(1)
+def isPrime(n):
+    if n <= 1:
+        return False
+
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+        
+# Time: O(L^2),  Space: O(1)
+# Given L is the number of spiral layers examined
+def spiralPrimeRatioFormula(n):
+    if n <= 0 or 1 <= n:
+        return None
+    
+    total = 1
+    spiralPrimes = 0
+    length = 3
+
+    while True:
+        if isPrime(length ** 2 - 3*length + 3):
+            spiralPrimes += 1
+            
+        if isPrime(length ** 2 - 2*length + 2):
+            spiralPrimes += 1
+            
+        if isPrime(length ** 2 - length + 1):
+            spiralPrimes += 1
+            
+        if isPrime(length ** 2):
+            spiralPrimes += 1
+        
+        total += 4
+
+        if spiralPrimes / total < n:
+            return length
+
+        length += 2
+
+
+print(spiralPrimeRatioCorners(0.1))
+print(spiralPrimeRatioFormula(0.1))
