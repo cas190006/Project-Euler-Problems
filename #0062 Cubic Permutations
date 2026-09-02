@@ -1,0 +1,35 @@
+"""
+The cube, 41063625 (345^3), can be permuted to produce two other cubes: 56623104 (384^3) and 66430125 (405^3).
+In fact, 41063625 is the smallest cube which has exactly three permutations of its digits which are also cubes.
+
+Find the smallest cube for which exactly five permutations of its digits are cubes.
+
+ANSWER: 127035954683
+"""
+
+# Time: O(K),  Space: O(K)
+# Given K = the number of cubes examined before finding n permutations
+def cubicPermutations(n):
+    if n < 1:
+        return None
+    
+    permutationDigits = {}
+    num = 1
+    
+    while True:
+        cube = num ** 3
+        digits = tuple(sorted(str(cube)))
+        
+        if digits not in permutationDigits:
+            permutationDigits[digits] = [cube]
+        else:
+            permutationDigits[digits].append(cube)
+        
+        if len(permutationDigits[digits]) == n:
+            return permutationDigits[digits][0]
+        
+        num += 1
+
+
+print(cubicPermutations(3))
+print(cubicPermutations(5))
