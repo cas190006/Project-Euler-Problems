@@ -1,0 +1,51 @@
+"""
+The 5-digit number, 16807 = 7^5, is also a fifth power.
+Similarly, the 9-digit number, 134217728 = 8^9, is a ninth power.
+
+How many n-digit positive integers exist which are also an nth power?
+
+ANSWER: 49
+"""
+
+# Time: O(1),  Space: O(1)
+def powerfulDigitCounts():
+    digitCount = 0
+    
+    n = 1
+    isCount = True
+    
+    while isCount:
+        isCount = False
+        
+        for i in range(1, 10):
+            if len(str(i ** n)) == n:
+                digitCount += 1
+                isCount = True
+                
+        n += 1
+    
+    return digitCount
+
+# Time: O(1),  Space: O(1)
+def powerfulDigitCountsLowerBound():
+    digitCount = 0
+    
+    n = 1
+    isCount = True
+    
+    while isCount:
+        isCount = False
+        start = int((10 ** (n-1)) ** (1/n))
+        
+        for i in range(start, 10):
+            if len(str(i ** n)) == n:
+                digitCount += 1
+                isCount = True
+                
+        n += 1
+    
+    return digitCount
+
+
+print(powerfulDigitCounts())
+print(powerfulDigitCountsLowerBound())
