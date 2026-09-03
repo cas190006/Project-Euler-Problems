@@ -1,0 +1,37 @@
+"""
+By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is 23.
+
+3
+7 4
+2 4 6
+8 5 9 3
+
+That is, 3 + 7 + 4 + 9 = 23.
+
+Find the maximum total from top to bottom in triangle.txt, a 15K text file containing a triangle with one-hundred rows.
+
+ANSWER: 7273
+"""
+
+# Time O(rows^2), Space O(1)
+# Given rows = len(triangle)
+def maximumPathSum(triangle):    
+    for row in range(len(triangle)-2, -1, -1):
+        for col in range(len(triangle[row])):
+            triangle[row][col] += max(triangle[row+1][col], triangle[row+1][col+1])
+        
+    return triangle[0][0]
+
+
+testTriangle = [
+    [3],
+    [7, 4],
+    [2, 4, 6],
+    [8, 5, 9, 3]
+]
+
+with open('triangle.txt', 'r') as file:
+    triangle = [list(map(int, row.split(" "))) for row in file.read().split('\n')[:-1]]
+
+print(maximumPathSum(testTriangle))
+print(maximumPathSum(triangle))
