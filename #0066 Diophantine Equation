@@ -1,0 +1,91 @@
+import math
+"""
+Consider quadratic Diophantine equations of the form:
+x² - Dy² = 1
+
+For example, when D = 13, the minimal solution in x is:
+649² - 13 × 180² = 1
+
+It can be assumed that there are no solutions in positive integers when D is square.
+
+By finding minimal solutions in x for D = {2, 3, 5, 6, 7}, we obtain the following:
+3² - 2 × 2² = 1
+2² - 3 × 1² = 1
+9² - 5 × 4² = 1
+5² - 6 × 2² = 1
+8² - 7 × 3² = 1
+
+Hence, by considering minimal solutions in x for D ≤ 7, the largest x is obtained when D = 5.
+
+Find the value of D ≤ 1000 in minimal solutions of x for which the largest value of x is obtained.
+
+ANSWER: 661
+"""
+
+# Time: O(n^(3/2)), Space: O(1)
+def largestXDiophantineEquation(n):
+    largestX = 0
+    largestD = 1
+    
+    for D in range(2, n+1):
+        squareRoot = math.isqrt(D)
+
+        if squareRoot ** 2 != D:
+            minimalSolution = minimalDiophantineEquationSolution(D)
+            
+            if largestX < minimalSolution[0]:
+                largestX = minimalSolution[0]
+                largestD = D
+            
+    return largestD
+
+# Time: O(D^(1/2)), Space: O(1)
+def minimalDiophantineEquationSolution(D):
+    squareRoot = math.isqrt(D)
+
+    if squareRoot ** 2 == D:
+        return (0, 0)
+    
+    offset = 0
+    denominator = 1
+    coefficient = squareRoot
+
+    previousNumerator = 0
+    numerator = 1
+
+    previousDenominator = 1
+    denominatorValue = 0
+    
+    while True:
+        currentNumerator = coefficient * numerator + previousNumerator
+        currentDenominator = coefficient * denominatorValue + previousDenominator
+        
+        if currentNumerator ** 2 - D*(currentDenominator ** 2) == 1:
+            return (currentNumerator, currentDenominator)
+        
+        previousNumerator = numerator
+        numerator = currentNumerator
+
+        previousDenominator = denominatorValue
+        denominatorValue = currentDenominator
+
+        offset = denominator * coefficient - offset
+        denominator = (D - offset * offset) // denominator
+        coefficient = (squareRoot + offset) // denominator
+
+# Time: O(y_min), Space: O(1)
+# Given y_min is the minimal solution denominator
+def minimalDiophantineEquationSolutionBrute(D):
+    y = 1
+    
+    while True:
+        x = math.isqrt(1 + (D*y*y))
+        
+        if x ** 2 - D*(y ** 2) == 1:
+            return (x, y)
+        
+        y += 1
+
+
+print(largestXDiophantineEquation(7))
+print(largestXDiophantineEquation(1000))
