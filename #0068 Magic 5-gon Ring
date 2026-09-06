@@ -1,0 +1,122 @@
+from itertools import permutations
+"""
+Consider the following "magic" 3-gon ring, filled with the numbers 1 to 6, and each line adding to nine.
+Working clockwise, and starting from the group of three with the numerically lowest external node (4,3,2 in this example), each solution can be described uniquely.
+For example, the above solution can be described by the set: 4,3,2; 6,2,1; 5,1,3.
+
+It is possible to complete the ring with four different totals: 9, 10, 11, and 12. There are eight solutions in total.
+
+Total — Solution Set
+9 — 4,2,3; 5,3,1; 6,1,2
+9 — 4,3,2; 6,2,1; 5,1,3
+10 — 2,3,5; 4,5,1; 6,1,3
+10 — 2,5,3; 6,3,1; 4,1,5
+11 — 1,4,6; 3,6,2; 5,2,4
+11 — 1,6,4; 5,4,2; 3,2,6
+12 — 1,5,6; 2,6,4; 3,4,5
+12 — 1,6,5; 3,5,4; 2,4,6
+
+By concatenating each group it is possible to form 9-digit strings;
+the maximum string for a 3-gon ring is 432621513.
+
+Using the numbers 1 to 10, and depending on arrangements, it is possible to form 16- and 17-digit strings.
+What is the maximum 16-digit string for a "magic" 5-gon ring?
+
+ANSWER: 6531031914842725
+"""
+
+# Time: O((2n)! * n^2), Space: O((2n)! * n)
+def magicNGonMaxStringBrute(n, d):
+    extra = sum(len(str(x)) - 1 for x in range(1, 2*n + 1) if x >= 10)
+    lowestDigitLength = 3*n + extra
+    hightestDigitLength = 3*n + 2*extra
+    
+    if n < 3 or (lowestDigitLength > d or d > hightestDigitLength):
+        return None
+    
+    maxNum = 2*n
+    lowest = (5*n + 3) // 2
+    highest = (7*n + 3) // 2
+    
+    lines = [(0,1,2)]
+    for i in range(1, n-1):
+        lines.append((2*i + 1,2*i,2*(i+1)))
+    lines.append((maxNum-1,2*(n-1),1))
+    
+    groups = {}
+    
+    for total in range(lowest, highest+1):
+        groups[total] = set()
+    
+    maxSet = 0
+    perms = list(permutations([i for i in range(1, maxNum+1)]))
+    
+    for perm in perms:
+        for total in range(lowest, highest+1):
+            addsUp = True
+            group = []
+            
+            for i,j,k in lines:
+                if perm[i] + perm[j] + perm[k] != total:
+                    addsUp = False
+                    break
+                group.append((perm[i], perm[j], perm[k]))
+                
+                if addsUp and set(group) not in groups[total]:
+                    index = min(range(len(group)), key=lambda i: group[i][0])
+                    group = group[index:] + group[:index]
+                    
+                    intSet = int("".join("".join(str(x) for x in t) for t in group))
+                    
+                    if len(str(intSet)) == d:
+                        maxSet = max(maxSet, intSet)
+                        groups[total].add(frozenset(set(group)))
+    
+    return maxSet
+
+# Time: O(n^2 * ((2n)! / n!)), Space: O(n)
+def magicNGonMaxString(n, d):
+    maxNum = 2*n
+    extra = sum(len(str(x)) - 1 for x in range(1, maxNum+1) if x >= 10)
+    lowestDigitLength = 3*n + extra
+    hightestDigitLength = 3*n + 2*extra
+    
+    if n < 3 or (lowestDigitLength > d or d > hightestDigitLength):
+        return None
+    
+    maxSet = 0
+    lowest = (5*n + 3) // 2
+    highest = (7*n + 3) // 2
+    
+    numbers = set(range(1, maxNum + 1))
+
+    for total in range(lowest, highest + 1):
+        for inner in permutations(range(1, maxNum + 1), n):
+            innerSet = set(inner)
+            outer = [total - inner[i] - inner[(i + 1) % n] for i in range(n)]
+
+            if any(x < 1 or x > maxNum for x in outer) or len(set(outer)) < n:
+                continue
+
+            if innerSet & set(outer) or innerSet | set(outer) != numbers:
+                continue
+
+            if outer[0] != min(outer):
+                continue
+            
+            groups = [(outer[i], inner[i], inner[(i + 1) % n]) for i in range(n)]
+            intSet = ''.join(''.join(str(x) for x in group) for group in groups)
+
+            if len(intSet) != d:
+                continue
+            
+            maxSet = max(maxSet, int(intSet))
+
+    return maxSet
+
+
+print(magicNGonMaxStringBrute(3, 9))
+print(magicNGonMaxString(3, 9))
+
+print(magicNGonMaxStringBrute(5, 16))
+print(magicNGonMaxString(5, 16))
