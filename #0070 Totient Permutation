@@ -1,0 +1,119 @@
+"""
+Euler's totient function, phi(n) [sometimes called the phi function], is used to determine the number of positive numbers less than or equal to n which are relatively prime to n.
+For example, as 1, 2, 4, 5, 7, and 8 are all less than nine and relatively prime to nine, phi(9) = 6.
+
+The number 1 is considered to be relatively prime to every positive number, so phi(1) = 1.
+
+Interestingly, phi(87109) = 79180, and it can be seen that 87109 is a permutation of 79180.
+
+Find the value of n, 1 < n < 10^7, for which phi(n) is a permutation of n and the ratio n/phi(n) produces a minimum.
+
+ANSWER: 8319823
+"""
+
+# Time: O(n log n log log n), Space: O(n)
+def lowestTotientPermutationBrute(n):
+    minN = 1
+    minValue = float('inf')
+    totients = totientsLessThanN(n)
+    
+    for i in range(2, n):
+        totientValue = totients[i]
+        fraction = i / totientValue
+        
+        if sorted(str(i)) == sorted(str(totientValue)) and minValue > fraction:
+            minValue = fraction
+            minN = i
+
+    return minN
+
+# Time: O(n log log n), Space: O(n)
+def totientsLessThanN(n):
+    totients = list(range(n))
+
+    for p in range(2, n):
+        if totients[p] == p:
+            for j in range(p, n, p):
+                totients[j] -= totients[j] // p
+                
+    return totients
+
+# Time: O(n² log log n / log n), Space: O(n)
+def lowestTotientPermutationFull(n):
+    minN = 1
+    minValue = float('inf')
+    
+    primes = primesLessThanN(n)
+    totients = totientsLessThanN(n)
+    
+    for i in range(1, len(primes)):
+        for j in range(0, i):
+            num = primes[j] * primes[i]
+            
+            if num >= n:
+                break
+            
+            totientValue = totients[num]
+            fraction = num / totientValue
+            
+            if sorted(str(num)) == sorted(str(totientValue)) and minValue > fraction:
+                minValue = fraction
+                minN = num
+                
+    return minN
+
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = []
+    nums = [True] * (n)
+    
+    for p in range(2, n):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, n, p):
+                nums[i] = False
+
+    return primes
+
+# Time: O((n log log n + m² log log n) / log n), Space: O(n)
+def lowestTotientPermutationBounded(n):
+    minN = 1
+    minValue = float('inf')
+    
+    lowestValue = n // smallestPrimeFactor(n)
+    primes = primesLessThanN(lowestValue)
+    totients = totientsLessThanN(n)
+    
+    for i in range(1, len(primes)):
+        for j in range(0, i):
+            num = primes[j] * primes[i]
+            
+            if num >= n:
+                break
+            
+            totientValue = totients[num]
+            fraction = num / totientValue
+            
+            if sorted(str(num)) == sorted(str(totientValue)) and minValue > fraction:
+                minValue = fraction
+                minN = num
+                
+    return minN
+
+# Time: O(sqrt(n)), Space: O(1)
+def smallestPrimeFactor(n):
+    if n % 2 == 0:
+        return 2
+
+    i = 3
+    while i * i <= n:
+        if n % i == 0:
+            return i
+        i += 2
+
+    return n
+
+
+print(lowestTotientPermutationBrute(10000000))
+print(lowestTotientPermutationFull(10000000))
+print(lowestTotientPermutationBounded(10000000))
