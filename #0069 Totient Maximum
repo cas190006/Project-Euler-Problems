@@ -28,8 +28,8 @@ def totientMaximumBrute(n):
     maxValue = 0
 
     for i in range(2, n+1):
-        phi = totient(i)
-        fraction = i / phi
+        totientValue = totient(i)
+        fraction = i / totientValue
 
         if fraction > maxValue:
             maxValue = fraction
@@ -58,6 +58,32 @@ def totient(n):
 
     return result
 
+# Time: O(n log log n), Space: O(n)
+def totientMaximumBruteSieve(n):
+    maxN = 1
+    maxValue = 0
+    totients = totientsLessThanOrEqualN(n)
+
+    for i in range(2, n+1):
+        fraction = i / totients[i]
+
+        if fraction > maxValue:
+            maxValue = fraction
+            maxN = i
+
+    return maxN
+
+# Time: O(n log log n), Space: O(n)
+def totientsLessThanOrEqualN(n):
+    totients = list(range(n+1))
+
+    for p in range(2, n+1):
+        if totients[p] == p:
+            for j in range(p, n+1, p):
+                totients[j] -= totients[j] // p
+
+    return totients
+
 # Time: O((n * sqrt(n)) / log(n)), Space: O(1)
 def totientMaximum(n):
     num = 2
@@ -84,7 +110,9 @@ def isPrime(n):
 
 
 print(totientMaximumBrute(10))
+print(totientMaximumBruteSieve(10))
 print(totientMaximum(10))
 
 print(totientMaximumBrute(1000000))
+print(totientMaximumBruteSieve(1000000))
 print(totientMaximum(1000000))
