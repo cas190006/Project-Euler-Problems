@@ -54,6 +54,6 @@ def orderedFractions(n, targetFraction):
 
 
 print(orderedFractionsBrute(8, (3, 7)))
-
 print(orderedFractions(8, (3, 7)))
+
 print(orderedFractions(1000000, (3, 7)))
