@@ -1,0 +1,100 @@
+import math
+"""
+The number 145 is well known for the property that the sum of the factorial of its digits is equal to 145:
+1! + 4! + 5! = 1 + 24 + 120 = 145.
+
+Perhaps less well known is 169, in that it produces the longest chain of numbers that link back to 169;
+it turns out that there are only three such loops that exist:
+
+169 → 363601 → 1454 → 169
+871 → 45361 → 871
+872 → 45362 → 872
+
+It is not difficult to prove that EVERY starting number will eventually get stuck in a loop. For example:
+
+69 → 363600 → 1454 → 169 → 363601 (→ 1454)
+78 → 45360 → 871 → 45361 (→ 871)
+540 → 145 (→ 145)
+
+Starting with 69 produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.
+
+How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?
+
+ANSWER: 402
+"""
+
+# Time: O(n log n), Space: O(1)
+def digitFactorialChainsBrute(n, chainLength):
+    total = 0
+    factorials = [math.factorial(i) for i in range(10)]
+    
+    for number in range(1, n):
+        current = number
+        chain = set()
+        
+        while current not in chain:
+            chain.add(current)
+            factorialSum = 0
+            
+            while current > 0:
+                factorialSum += factorials[current % 10]
+                current //= 10
+                
+            current = factorialSum
+            
+        if len(chain) == chainLength:
+            total += 1
+                
+    return total
+
+# Time: O(n log n), Space: O(n)
+def digitFactorialChains(n, targetLength):
+    total = 0
+    chainLengths = {}
+    factorials = [math.factorial(i) for i in range(10)]
+
+    for number in range(1, n):
+        current = number
+        chain = []
+        chainSet = set()
+
+        while current not in chainSet and current not in chainLengths:
+            chainSet.add(current)
+            chain.append(current)
+            factorialSum = 0
+
+            while current > 0:
+                factorialSum += factorials[current % 10]
+                current //= 10
+
+            current = factorialSum
+
+        if current in chainLengths:
+            length = chainLengths[current]
+            remainingChain = chain
+
+        else:
+            cycleStart = chain.index(current)
+            cycleLength = len(chain) - cycleStart
+
+            for value in chain[cycleStart:]:
+                chainLengths[value] = cycleLength
+
+            length = cycleLength
+            remainingChain = chain[:cycleStart]
+
+        for value in reversed(remainingChain):
+            length += 1
+            chainLengths[value] = length
+
+        if chainLengths[number] == targetLength:
+            total += 1
+
+    return total
+
+
+print(digitFactorialChainsBrute(70, 5))
+print(digitFactorialChains(70, 5))
+
+print(digitFactorialChainsBrute(1000000, 60))
+print(digitFactorialChains(1000000, 60))
