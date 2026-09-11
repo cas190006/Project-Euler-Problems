@@ -48,7 +48,7 @@ def maximisedIntegerRightTrianglesEquation(n):
     
     return maximisedP
 
-# Time: O(n log n), Space: O(1)
+# Time: O(n log n), Space: O(n)
 def maximisedIntegerRightTrianglesKnownTriples(n):
     perimeterSolutions = [0] * (n+1)
     triples = primitivePythagoreanTriples(n)
