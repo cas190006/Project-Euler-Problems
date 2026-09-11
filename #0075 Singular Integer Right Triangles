@@ -1,0 +1,97 @@
+import math
+"""
+It turns out that 12 cm is the smallest length of wire that can be bent to form an integer sided right angle triangle in exactly one way, but there are many more examples.
+12 cm: (3,4,5)
+24 cm: (6,8,10)
+30 cm: (5,12,13)
+36 cm: (9,12,15)
+40 cm: (8,15,17)
+48 cm: (12,16,20)
+
+In contrast, some lengths of wire, like 20 cm, cannot be bent to form an integer sided right angle triangle, and other lengths allow more than one solution to be found;
+for example, using 120 cm it is possible to form exactly three different integer sided right angle triangles.
+120 cm: (30,40,50), (20,48,52), (24,45,51)
+
+Given that L is the length of the wire, for how many values of L ≤ 1,500,000 can exactly one integer sided right angle triangle be formed?
+
+ANSWER: 161667
+"""
+
+# Time: O(L^3), Space: O(1)
+def singularIntegerRightTrianglesBrute(L, s):
+    totalSolutionCount = 0
+    
+    for p in range(12, L+1):
+        solutionCount = 0
+        for a in range(3, ((p-3) // 3) + 1):
+            for b in range(a+1, ((p-1-a) // 2) + 1):
+                c = p - a - b
+            
+                if (a*a + b*b) == c*c:
+                    solutionCount += 1
+                    
+        if solutionCount == s:
+            totalSolutionCount += 1
+    
+    return totalSolutionCount
+
+# Time: O(L^2), Space: O(1)
+def singularIntegerRightTrianglesEquation(L, s):
+    totalSolutionCount = 0
+    
+    for p in range(12, L+1):
+        solutionCount = 0
+        for a in range(3, ((p-3) // 3) + 1):
+            b = (p**2 - (2*p*a)) // (2*(p-a))
+            c = p - a - b
+            
+            if (a*a + b*b) == c*c:
+                solutionCount += 1
+
+        if solutionCount == s:
+            totalSolutionCount += 1
+    
+    return totalSolutionCount
+
+# Time: O(L log L), Space: O(L)
+def singularIntegerRightTrianglesKnownTriples(L, s):
+    perimeterSolutions = [0] * (L+1)
+    triples = primitivePythagoreanTriples(L)
+    
+    for triple in triples:
+        perimeter = sum(triple)
+        
+        for i in range(1, L//perimeter + 1):
+            perimeterSolutions[perimeter*i] += 1
+    
+    return perimeterSolutions.count(s)
+
+# Time: O(perimeter), Space: O(perimeter)
+def primitivePythagoreanTriples(perimeter):
+    triples = set()
+
+    m = 2
+    while 2 * m * (m + 1) <= perimeter:
+        for n in range(1, m):
+            newPerimeter = 2 * m * (m + n)
+
+            if newPerimeter > perimeter:
+                break
+
+            if (m - n) % 2 == 1 and math.gcd(m, n) == 1:
+                a = m * m - n * n
+                b = 2 * m * n
+                c = m * m + n * n
+
+                triples.add((a, b, c))
+
+        m += 1
+
+    return triples
+
+
+print(singularIntegerRightTrianglesBrute(48, 1))
+print(singularIntegerRightTrianglesEquation(48, 1))
+print(singularIntegerRightTrianglesKnownTriples(48, 1))
+
+print(singularIntegerRightTrianglesKnownTriples(1500000, 1))
