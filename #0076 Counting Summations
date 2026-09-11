@@ -1,0 +1,48 @@
+"""
+It is possible to write five as a sum in exactly six different ways:
+4 + 1
+3 + 2
+3 + 1 + 1
+2 + 2 + 1
+2 + 1 + 1 + 1
+1 + 1 + 1 + 1 + 1
+
+How many different ways can one hundred be written as a sum of at least two positive integers?
+
+ANSWER: 190569291
+"""
+
+# Time: O(T^3),  Space: O(T^2)
+# Given T = target
+def summationTargetAmountsBrute(target, minComboCount):
+    sumComboCount = [[0] * (target+1) for _ in range(target+1)]
+    sumComboCount[0][0] = 1
+
+    for num in range(1, target+1):
+        for amount in range(num, target+1):
+            for count in range(1, amount+1):
+                sumComboCount[amount][count] += sumComboCount[amount - num][count-1]
+                
+    return sum(sumComboCount[target][minComboCount:])
+
+# Time: O(T^2),  Space: O(T^2)
+# Given T = target
+def summationTargetAmounts(target, minComboCount):
+    sumComboCount = [[0] * (target+1) for _ in range(target+1)]
+    sumComboCount[0][0] = 1
+
+    for amount in range(1, target+1):
+        for count in range(1, amount+1):
+            sumWithOne = sumComboCount[amount-1][count-1]
+            sumWithoutOne = sumComboCount[amount - count][count]
+
+            sumComboCount[amount][count] = sumWithOne + sumWithoutOne
+
+    return sum(sumComboCount[target][minComboCount:])
+
+
+print(summationTargetAmountsBrute(5, 2))
+print(summationTargetAmounts(5, 2))
+
+print(summationTargetAmountsBrute(100, 2))
+print(summationTargetAmounts(100, 2))
