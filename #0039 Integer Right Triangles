@@ -13,7 +13,7 @@ def maximisedIntegerRightTrianglesBrute(n):
     maximisedP = 0
     maximisedSolutionCount = 0
     
-    for p in range(5, n+1):
+    for p in range(12, n+1):
         solutionCount = 0
         for a in range(3, ((p-3) // 3) + 1):
             for b in range(a+1, ((p-1-a) // 2) + 1):
@@ -33,7 +33,7 @@ def maximisedIntegerRightTrianglesEquation(n):
     maximisedP = 0
     maximisedSolutionCount = 0
     
-    for p in range(5, n+1):
+    for p in range(12, n+1):
         solutionCount = 0
         for a in range(3, ((p-3) // 3) + 1):
             b = (p**2 - (2*p*a)) // (2*(p-a))
