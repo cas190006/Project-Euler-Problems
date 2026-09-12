@@ -1,0 +1,50 @@
+import math
+"""
+It is possible to write ten as the sum of primes in exactly five different ways:
+7 + 3
+5 + 5
+5 + 3 + 2
+3 + 3 + 2 + 2
+2 + 2 + 2 + 2 + 2
+
+What is the first value which can be written as the sum of primes in over five thousand different ways?
+
+ANSWER: 71
+"""
+
+# Time: O(S^3),  Space: O(S)
+# Given S = sumCount
+def primeSummationWays(sumCount):
+    primes = []
+    number = 2
+
+    while True:
+        sumCombos = [0] * (number + 1)
+        sumCombos[0] = 1
+
+        if isPrime(number):
+            primes.append(number)
+
+        for p in primes:
+            for amount in range(p, number + 1):
+                sumCombos[amount] += sumCombos[amount - p]
+                
+        if sumCombos[number] >= sumCount:
+            return number
+
+        number += 1
+        
+# Time O(sqrt(n)), Space O(1)
+def isPrime(n):
+    if n <= 1:
+        return False
+
+    for i in range(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+
+    return True
+
+
+print(primeSummationWays(5))
+print(primeSummationWays(5000))
