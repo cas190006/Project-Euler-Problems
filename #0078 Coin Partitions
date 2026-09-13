@@ -1,0 +1,71 @@
+"""
+Let p(n) represent the number of different ways in which n coins can be separated into piles. For example, five coins can be separated into piles in exactly seven different ways, so p(5) = 7.
+OOOOO
+OOOO O
+OOO OO
+OOO O O
+OO OO O
+OO O O O
+O O O O O
+
+Find the least value of n for which p(n) is divisible by one million.
+
+ANSWER: 55374
+"""
+
+# Time: O(T^3),  Space: O(T)
+# Given T = target
+def coinPartitionsBrute(divisible):
+    number = 1
+    
+    while True:
+        sumCombos = [0] * (number + 1)
+        sumCombos[0] = 1
+
+        for num in range(1, number + 1):
+            for amount in range(num, number + 1):
+                sumCombos[amount] += sumCombos[amount - num]
+                
+        
+        if sumCombos[number] % divisible == 0:
+            return number
+        
+        number += 1
+
+# Time: O(T^(3/2)),  Space: O(T)
+# Given T = target
+def coinPartitions(divisible):
+    partitions = [1]
+    number = 1
+
+    while True:
+        total = 0
+        k = 1
+
+        while True:
+            p1 = k * (3 * k - 1) // 2
+            p2 = k * (3 * k + 1) // 2
+
+            if p1 > number:
+                break
+
+            sign = 1 if k % 2 else -1
+
+            total += sign * partitions[number - p1]
+
+            if p2 <= number:
+                total += sign * partitions[number - p2]
+
+            k += 1
+        
+        if total % divisible == 0:
+            return number
+        
+        partitions.append(total)
+        number += 1
+
+
+print(coinPartitionsBrute(7))
+print(coinPartitions(7))
+
+print(coinPartitions(1000000))
