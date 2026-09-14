@@ -1,0 +1,139 @@
+from collections import deque
+"""
+A common security method used for online banking is to ask the user for three random characters from a passcode.
+For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters;
+the expected reply would be: 317.
+
+The text file, keylog.txt, contains fifty successful login attempts.
+
+Given that the three characters are always asked for in order, analyse the file so as to determine the shortest possible secret passcode of unknown length.
+
+ANSWER: 73162890
+"""
+
+# Time: O(u^2 * n),  Space: O(n)
+# Given u = len(unique), n = the total number of characters across all strings in keylog
+def passcodeDerivationBrute(keylog):
+    attmpts = keylog.copy()
+    unique = {char for pw in attmpts for char in pw}
+    password = ""
+    
+    for _ in range(len(unique)-1):
+        for char in list(unique):
+            isFront = True
+            for pw in attmpts:
+                foundIndex = pw.find(char)
+                if foundIndex != -1 and foundIndex != 0:
+                    isFront = False
+                    break
+                    
+            if isFront:
+                password += char
+                
+                for i in range(len(attmpts)):
+                    foundIndex = attmpts[i].find(char)
+                    if foundIndex == 0:
+                        attmpts[i] = attmpts[i][1:]
+                
+                unique.remove(char)
+                break
+        
+        attmpts = [item for item in attmpts if item != ""]
+        
+    password += unique.pop()
+    
+    return password
+
+# Time: O(u^2 * n),  Space: O(n)
+# Given u = len(unique), n = the total number of characters across all strings in keylog
+def passcodeDerivationBothEnds(keylog):
+    attmpts = keylog.copy()
+    unique = {char for pw in attmpts for char in pw}
+    
+    password_front = ""
+    password_back = ""
+    length = len(unique)
+    
+    for _ in range(length//2):
+        for char in list(unique):
+            isFront = True
+            isBack = True
+            
+            for pw in attmpts:
+                index = pw.find(char)
+                
+                if index != -1:
+                    if index != 0:
+                        isFront = False
+
+                    if index != len(pw) - 1:
+                        isBack = False
+            
+            if isFront:
+                password_front += char
+                
+                for i in range(len(attmpts)):
+                    if attmpts[i].startswith(char):
+                        attmpts[i] = attmpts[i][1:]
+                
+                unique.remove(char)
+                
+            elif isBack:
+                password_back += char
+                
+                for i in range(len(attmpts)):
+                    if attmpts[i].endswith(char):
+                        attmpts[i] = attmpts[i][:-1]
+                
+                unique.remove(char)        
+                
+        attmpts = [item for item in attmpts if item != ""]
+        
+    if len(unique) == 1:
+        password = password_front + unique.pop() + password_back[::-1]
+    else:
+        password = password_front + password_back[::-1]
+    
+    return password
+
+# Time: O(n)
+# Space: O(n)
+# Given n = total number of characters in keylog
+def passcodeDerivationTopologicalSort(keylog):
+    attempts = keylog.copy()
+    
+    nextChars = {}
+    remainingChars = {}
+
+    for pw in attempts:
+        for char in pw:
+            if char not in nextChars:
+                nextChars[char] = set()
+                remainingChars[char] = 0
+
+        for a, b in zip(pw, pw[1:]):
+            if b not in nextChars[a]:
+                nextChars[a].add(b)
+                remainingChars[b] += 1
+
+    queue = deque(char for char in remainingChars if remainingChars[char] == 0)
+    password = ""
+
+    while queue:
+        char = queue.popleft()
+        password += char
+
+        for neighbor in nextChars[char]:
+            remainingChars[neighbor] -= 1
+            if remainingChars[neighbor] == 0:
+                queue.append(neighbor)
+
+    return password
+
+
+with open('keylog.txt', 'r') as file:
+    keylog = [row for row in file.read().split('\n')[:-1]]
+
+print(passcodeDerivationBrute(keylog))
+print(passcodeDerivationBothEnds(keylog))
+print(passcodeDerivationTopologicalSort(keylog))
