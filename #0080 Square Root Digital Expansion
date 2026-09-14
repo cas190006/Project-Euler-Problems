@@ -1,0 +1,30 @@
+import math
+from decimal import Decimal, getcontext
+"""
+It is well known that if the square root of a natural number is not an integer, then it is irrational.
+The decimal expansion of such square roots is infinite without any repeating pattern at all.
+
+The square root of two is 1.41421356237309504880..., and the digital sum of the first one hundred decimal digits is 475.
+
+For the first one hundred natural numbers, find the total of the digital sums of the first one hundred decimal digits for all the irrational square roots.
+
+ANSWER: 40886
+"""
+
+# Time: O(natural * digits), Space: O(digits)
+def squareRootDigitalSum(natural, digits):
+    total = 0
+    getcontext().prec = digits + len(str(math.isqrt(natural))) + 1
+    
+    for n in range(2, natural+1):
+        if math.isqrt(n) ** 2 != n:
+            
+            root = Decimal(n).sqrt()
+            rootDigits = str(root).replace('.', '')[:digits]
+            total += sum(int(digit) for digit in rootDigits)
+    
+    return total
+
+
+print(squareRootDigitalSum(2, 100))
+print(squareRootDigitalSum(100, 100))
