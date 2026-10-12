@@ -1,0 +1,64 @@
+import heapq
+"""
+In the 5 by 5 matrix below, the minimal path sum from the top left to the bottom right, by moving left, right, up, and down, is indicated in bold red and is equal to 2297.
+
+*131*  673 *234*  *103*  *18*
+*201* *96* *342*   965   *150*
+ 630   803  746   *422*  *111*
+ 537   699  497   *121*   956
+ 805   732  524   *37*   *331*
+
+Find the minimal path sum from the top left to the bottom right by moving left, right, up, and down in matrix.txt
+
+ANSWER: 425185
+"""
+
+# Time: O(rows * cols * log(rows * cols)), Space: O(rows * cols)
+def minPathSum(matrix):
+    rows = len(matrix)
+    cols = len(matrix[0])
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    
+    minPathMatrix = [[float('inf') for _ in range(cols)] for _ in range(rows)]
+    minPathMatrix[0][0] = matrix[0][0]
+    
+    minHeap = []
+    heapq.heappush(minHeap, (matrix[0][0], 0, 0))
+    
+    while minHeap:
+        pathCost, row, col = heapq.heappop(minHeap)
+        
+        if pathCost > minPathMatrix[row][col]:
+            continue
+        
+        if (row, col) == (rows-1, cols-1):
+            return pathCost
+        
+        for dirRow, dirCol in directions:
+            newRow, newCol = row + dirRow, col + dirCol
+
+            if not (0 <= newRow < rows and 0 <= newCol < cols):
+                continue
+
+            new_cost = pathCost + matrix[newRow][newCol]
+
+            if new_cost < minPathMatrix[newRow][newCol]:
+                minPathMatrix[newRow][newCol] = new_cost
+                heapq.heappush(minHeap, (new_cost, newRow, newCol))
+    
+    return minPathMatrix[rows-1][cols-1]
+
+
+with open('matrix.txt', 'r') as file:
+    matrix = [list(map(int, row.split(","))) for row in file.read().split('\n')[:-1]]
+
+testMatrix = [
+    [131, 673, 234, 103, 18],
+    [201,  96, 342, 965, 150],
+    [630, 803, 746, 422, 111],
+    [537, 699, 497, 121, 956],
+    [805, 732, 524,  37, 331]
+]
+
+print(minPathSum(testMatrix))
+print(minPathSum(matrix))
