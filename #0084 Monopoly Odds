@@ -1,0 +1,247 @@
+import numpy as np
+from itertools import product
+import random
+"""
+In the game, Monopoly, the standard board is set up as follows:
+
+A player starts on the GO square and adds the scores on two 6-sided dice to determine the number of squares they advance in a clockwise direction.
+Without any further rules we would expect to visit each square with equal probability: 2.5%.
+However, landing on G2J (Go To Jail), CC (community chest), and CH (chance) changes this distribution.
+
+In addition to G2J, and one card from each of CC and CH, that orders the player to go directly to jail, if a player rolls three consecutive doubles, they do not advance the result of their 3rd roll.
+Instead they proceed directly to jail.
+
+At the beginning of the game, the CC and CH cards are shuffled.
+When a player lands on CC or CH they take a card from the top of the respective pile and, after following the instructions, it is returned to the bottom of the pile.
+There are sixteen cards in each pile, but for the purpose of this problem we are only concerned with cards that order a movement; any instruction not concerned with movement will be ignored and the player will remain on the CC/CH square.
+
+- Community Chest (2/16 cards):
+Advance to GO
+Go to JAIL
+
+- Chance (10/16 cards):
+Advance to GO
+Go to JAIL
+Go to C1
+Go to E3
+Go to H2
+Go to R1
+Go to next R (railway company)
+Go to next R
+Go to next U (utility company)
+Go back 3 squares.
+
+The heart of this problem concerns the likelihood of visiting a particular square.
+That is, the probability of finishing at that square after a roll.
+For this reason it should be clear that, with the exception of G2J for which the probability of finishing on it is zero, the CH squares will have the lowest probabilities, as 5/8 request a movement to another square, and it is the final square that the player finishes at on each roll that we are interested in.
+We shall make no distinction between "Just Visiting" and being sent to JAIL, and we shall also ignore the rule about requiring a double to "get out of jail", assuming that they pay to get out on their next turn.
+
+By starting at GO and numbering the squares sequentially from 00 to 39 we can concatenate these two-digit numbers to produce strings that correspond with sets of squares.
+
+Statistically it can be shown that the three most popular squares, in order, are JAIL (6.24%) = Square 10, E3 (3.18%) = Square 24, and GO (3.09%) = Square 00.
+So these three most popular squares can be listed with the six-digit modal string: 102400.
+
+If, instead of using two 6-sided dice, two 4-sided dice are used, find the six-digit modal string.
+
+ANSWER: 101524
+"""
+
+# Time: O(R * S + I * S^2), Space: O(S^2 + R)
+# Given R = the number of possible dice-roll combinations, S = the number of states, I = the number of power iterations until convergence
+def monopolyMarkovChain(dice, popular):
+    if not dice or any(not isinstance(s, int) or s < 1 for s in dice) or popular <= 0 or popular > 40:
+        return None
+    
+    boardSquareCount = 40
+    maxDoublesStreak = 3
+    squareStateCount = boardSquareCount * maxDoublesStreak
+
+    GO, JAIL, G2J = 0, 10, 30
+    CCSquares = {2, 17, 33}
+    CHSquares = {7, 22, 36}
+    
+    nextRailwaySquare = {7: 15, 22: 25, 36: 5}
+    nextUtilitySquare = {7: 12, 22: 28, 36: 12}
+
+    diceRolls = list(product(*[range(1, sides + 1) for sides in dice]))
+    rollProb = 1 / len(diceRolls)
+
+    def stateId(square, streak):
+        return square * maxDoublesStreak + streak
+
+    def resolveSquare(square):
+        result = {}
+
+        def addProbability(destination, probability, sent=False):
+            key = (destination, sent)
+            result[key] = result.get(key, 0) + probability
+
+        if square == G2J:
+            return {(JAIL, True): 1.0}
+
+        if square in CCSquares:
+            addProbability(square, 14 / 16)
+            addProbability(GO, 1 / 16)
+            addProbability(JAIL, 1 / 16, True)
+            return result
+
+        if square in CHSquares:
+            nextRailway = nextRailwaySquare[square]
+            nextUtility = nextUtilitySquare[square]
+
+            cards = [
+                None, None, None, None, None, None,
+                GO, JAIL, 11, 24, 39, 5,
+                nextRailway, nextRailway,
+                nextUtility, (square - 3) % 40
+            ]
+
+            for destination in cards:
+                if destination is None:
+                    addProbability(square, 1 / 16)
+                else:
+                    for (final, sent), prob in (
+                        resolveSquare(destination).items()
+                    ):
+                        addProbability(final, prob / 16, sent)
+
+            return result
+
+        return {(square, False): 1.0}
+
+
+    P = np.zeros((squareStateCount, squareStateCount))
+
+    for square in range(boardSquareCount):
+        for streak in range(maxDoublesStreak):
+            row = stateId(square, streak)
+
+            for roll in diceRolls:
+                isDouble = len(roll) == 2 and roll[0] == roll[1]
+
+                if isDouble and streak == 2:
+                    P[row, stateId(JAIL, 0)] += rollProb
+                    continue
+
+                landing = (square + sum(roll)) % boardSquareCount
+
+                for (destination, sent), prob in (resolveSquare(landing).items()):
+                    if sent or not isDouble:
+                        newStreak = 0
+                    else:
+                        newStreak = streak + 1
+
+                    P[row, stateId(destination, newStreak)] += (rollProb * prob)
+                    
+    v = np.zeros(squareStateCount)
+    v[stateId(GO, 0)] = 1.0
+
+    for iteration in range(500000):
+        newV = v @ P
+
+        if np.max(np.abs(newV - v)) < 1e-14:
+            v = newV
+            break
+
+        v = newV
+    
+    probabilities = np.array([sum(v[stateId(sq, streak)] for streak in range(maxDoublesStreak)) for sq in range(boardSquareCount)])
+        
+    return "".join(f"{sq:02d}" for sq in np.argsort(probabilities)[::-1][:popular])
+
+# Time: O(T), Space: O(1)
+# Given T = number of turns simulated
+def monopolySimulation(dice, popular):
+    if not dice or any(not isinstance(s, int) or s < 1 for s in dice) or popular <= 0 or popular > 40:
+        return None
+    
+    boardSquareCount = 40
+    maxDoublesStreak = 3
+    turns = 500000
+
+    GO, JAIL, G2J = 0, 10, 30
+    CCSquares = {2, 17, 33}
+    CHSquares = {7, 22, 36}
+    
+    nextRailwaySquare = {7: 15, 22: 25, 36: 5}
+    nextUtilitySquare = {7: 12, 22: 28, 36: 12}
+    
+    CCCards = ["STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "MOVE_TO_GO", "MOVE_TO_JAIL"]
+    CHCards = ["STAY", "STAY", "STAY", "STAY", "STAY", "STAY", "MOVE_TO_GO", "MOVE_TO_JAIL", "MOVE_TO_C1", "MOVE_TO_E3", "MOVE_TO_H2", "MOVE_TO_R1", "NEXT_RAILWAY", "NEXT_RAILWAY", "NEXT_UTILITY", "BACK_THREE"]
+    
+    random.shuffle(CCCards)
+    random.shuffle(CHCards)
+        
+    def resolveSquare(square):
+        while True:
+            if square == G2J:
+                return JAIL
+
+            elif square in CCSquares:
+                card = CCCards.pop(0)
+                CCCards.append(card)
+
+                if card == "MOVE_TO_GO":
+                    square = GO
+                elif card == "MOVE_TO_JAIL":
+                    return JAIL
+                else:
+                    return square
+
+            elif square in CHSquares:
+                card = CHCards.pop(0)
+                CHCards.append(card)
+
+                if card == "MOVE_TO_GO":
+                    square = GO
+                elif card == "MOVE_TO_JAIL":
+                    return JAIL
+                elif card == "MOVE_TO_C1":
+                    square = 11
+                elif card == "MOVE_TO_E3":
+                    square = 24
+                elif card == "MOVE_TO_H2":
+                    square = 39
+                elif card == "MOVE_TO_R1":
+                    square = 5
+                elif card == "NEXT_RAILWAY":
+                    square = nextRailwaySquare[square]
+                elif card == "NEXT_UTILITY":
+                    square = nextUtilitySquare[square]
+                elif card == "BACK_THREE":
+                    square = (square - 3) % boardSquareCount
+                else:
+                    return square
+            else:
+                return square
+    
+    squaresVisitedCounter = {i: 0 for i in range(40)}
+    currentSquare = 0
+    doublesCount = 0
+    
+    for turn in range(turns):
+        roll = [random.randint(1, sides) for sides in dice]
+        
+        if roll[0] == roll[1]:
+            doublesCount += 1
+        else:
+            doublesCount = 0
+
+        if doublesCount == maxDoublesStreak:
+            currentSquare = JAIL
+            doublesCount = 0
+        else:
+            currentSquare = (currentSquare + sum(roll)) % boardSquareCount
+            currentSquare = resolveSquare(currentSquare)
+
+        squaresVisitedCounter[currentSquare] += 1
+        
+    topSqauresVisited = dict(sorted(squaresVisitedCounter.items(), key=lambda item: item[1], reverse=True)[:popular])
+    return "".join(f"{key:02d}" for key in topSqauresVisited)
+
+
+print(monopolyMarkovChain([6, 6], 3))
+print(monopolySimulation([6, 6], 3))
+
+print(monopolyMarkovChain([4, 4], 3))
+print(monopolySimulation([4, 4], 3))
