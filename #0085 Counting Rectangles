@@ -1,0 +1,53 @@
+"""
+By counting carefully it can be seen that a rectangular grid measuring 3 by 2 contains eighteen rectangles.
+
+Although there exists no rectangular grid that contains exactly two million rectangles, find the area of the grid with the nearest solution.
+
+ANSWER: 2772
+"""
+
+# Time: O(count),  Space: O(1)
+def findClosestRectangleBrute(count):
+    limit = round(((-1 + (1 + 8*count)**(1/2)) / 2))
+    rectangle = (0,0)
+    smallest = count
+    
+    for m in range(1, limit+1):
+        for n in range(1, m+1):
+            rectangles = ((m * n * (n + 1) * (m + 1)) // 4)
+            distance = abs(count - rectangles)
+            
+            if distance < smallest:
+                rectangle = (n,m)
+                smallest = distance
+    
+    return rectangle[0] * rectangle[1]
+
+# Time: O(sqr(count) log count),  Space: O(1)
+def findClosestRectangleSearch(count):
+    limit = round(((-1 + (1 + 8*count)**(1/2)) / 2))
+    rectangle = (0,0)
+    smallest = count
+
+    for n in range(1, limit+1):
+        low, high = n, limit
+
+        while low <= high:
+            m = (low + high) // 2
+            rectangles = ((m * n * (n + 1) * (m + 1)) // 4)
+            distance = abs(count - rectangles)
+
+            if distance < smallest:
+                rectangle = (n,m)
+                smallest = distance
+
+            if rectangles < count:
+                low = m + 1
+            else:
+                high = m - 1
+
+    return rectangle[0] * rectangle[1]
+
+
+print(findClosestRectangleBrute(2000000)) 
+print(findClosestRectangleSearch(2000000))
