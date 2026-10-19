@@ -1,0 +1,57 @@
+import math
+"""
+The smallest number expressible as the sum of a prime square, prime cube, and prime fourth power is 28.
+In fact, there are exactly four numbers below fifty that can be expressed in such a way:
+
+28 = 2² + 2³ + 2⁴
+33 = 3² + 2³ + 2⁴
+49 = 5² + 2³ + 2⁴
+47 = 2² + 3³ + 2⁴
+
+How many numbers below fifty million can be expressed as the sum of a prime square, prime cube, and prime fourth power?
+
+ANSWER: 1097343
+"""
+
+# Time: O(π(limit^(1/2)) * π(limit^(1/3)) * π(limit^(1/4))), Space: O(limit)
+def primePowerTriples(limit):
+    primes = primesLessThanN(math.isqrt(limit))
+    numbers = set()
+    
+    for p1 in primes:
+        square = p1 ** 2
+        if square > limit:
+            break
+        
+        for p2 in primes:
+            cube = p2 ** 3
+            if square + cube > limit:
+                break
+            
+            for p3 in primes:
+                quadruple = p3 ** 4
+                number = square + cube + quadruple
+                
+                if number >= limit:
+                    break
+                
+                numbers.add(number)
+    
+    return len(numbers)
+
+# Time: O(n log log n), Space: O(n)
+def primesLessThanN(n):
+    primes = []
+    nums = [True] * (n+1)
+    
+    for p in range(2, n+1):
+        if nums[p]:
+            primes.append(p)
+            for i in range(p*p, n+1, p):
+                nums[i] = False
+
+    return primes
+
+
+print(primePowerTriples(50))
+print(primePowerTriples(50000000))
