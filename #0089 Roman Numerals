@@ -1,0 +1,96 @@
+"""
+For a number written in Roman numerals to be considered valid there are basic rules which must be followed.
+Even though the rules allow some numbers to be expressed in more than one way there is always a "best" way of writing a particular number.
+
+For example, it would appear that there are at least six ways of writing the number sixteen:
+
+IIIIIIIIIIIIIIII
+VIIIIIIIIIII
+VVIIIIII
+XIIIIII
+VVVI
+XVI
+
+However, according to the rules only XIIIIII and XVI are valid, and the last example is considered to be the most efficient, as it uses the least number of numerals.
+
+The 11K text file, roman.txt, contains one thousand numbers written in valid, but not necessarily minimal, Roman numerals.
+
+Find the number of characters saved by writing each of these in their minimal form.
+
+ANSWER: 743
+"""
+
+# Time: O(r * n), Space: O(n)
+# Given r = Roman numeral strings in romans, n = maximum length of a Roman numeral string
+def charactersSavedConversion(romans):
+    saved = 0
+    
+    for roman in romans:
+        num = toNum(roman)
+        saved += len(roman) - len(toRoman(num))
+    
+    return saved
+
+# Time: O(1), Space: O(1)
+def toRoman(num):
+    lookup = [
+        (1000, 'M'), (900, 'CM'), (500, 'D'), (400, 'CD'),
+        (100, 'C'), (90, 'XC'), (50, 'L'), (40, 'XL'),
+        (10, 'X'), (9, 'IX'), (5, 'V'), (4, 'IV'), (1, 'I')
+    ]
+    
+    roman = ''
+    for value, symbol in lookup:
+        count, num = divmod(num, value)
+        roman += symbol * count
+        
+    return roman
+
+# Time: O(n), Space: O(1)
+def toNum(roman):
+    romanMap = {
+        'I': 1,
+        'V': 5,
+        'X': 10,
+        'L': 50,
+        'C': 100,
+        'D': 500,
+        'M': 1000
+    }
+    
+    num = 0
+    n = len(roman)
+    
+    for i in range(n):
+        currValue = romanMap[roman[i]]
+        if i + 1 < n and currValue < romanMap[roman[i + 1]]:
+            num -= currValue
+        else:
+            num += currValue
+            
+    return num
+
+# Time: O(r * n), Space: O(r * n)
+# Given r = Roman numeral strings in romans, n = maximum length of a Roman numeral string
+def charactersSavedReplacement(romans):
+    replacements = [
+        ("DCCCC", "CM"), ("CCCC", "CD"),
+        ("LXXXX", "XC"), ("XXXX", "XL"),
+        ("VIIII", "IX"), ("IIII", "IV")
+    ]
+
+    minimalRomans = []
+
+    for roman in romans:
+        for old, new in replacements:
+            roman = roman.replace(old, new)
+        minimalRomans.append(roman)
+
+    return sum(len(roman) for roman in romans) - sum(len(roman) for roman in minimalRomans)
+
+
+with open('roman.txt', 'r') as file:
+    romans = [row for row in file.read().split('\n')]
+
+print(charactersSavedConversion(romans))
+print(charactersSavedReplacement(romans))
