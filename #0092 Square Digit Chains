@@ -1,0 +1,65 @@
+"""
+A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before.
+
+For example:
+44 → 32 → 13 → 10 → 1 → 1
+85 → 89 → 145 → 42 → 20 → 4 → 16 → 37 → 58 → 89
+
+Therefore, any chain that arrives at 1 or 89 will become stuck in an endless loop.
+What is most amazing is that EVERY starting number will eventually arrive at 1 or 89.
+
+How many starting numbers below ten million will arrive at 89?
+
+ANSWER: 8581146
+"""
+
+# Time: O(n log n), Space: O(log n)
+def squareDigitChainsBrute(n):
+    nums = 0
+    
+    for i in range(2, n):
+        num = i
+        
+        while num != 1 and num != 89:
+            sqaureSum = 0
+            
+            while num > 0:
+                sqaureSum += (num % 10)**2
+                num //= 10
+                
+            num = sqaureSum
+            
+        if num == 89:
+            nums += 1
+    
+    return nums
+
+# Time: O(n log n), Space: O(n)
+def squareDigitChains(n):
+    end1 = {1}
+    end89 = {89}
+    
+    for i in range(2, n):
+        num = i
+        chain = {num}
+        
+        while num not in end1 and num not in end89:
+            sqaureSum = 0
+            
+            while num > 0:
+                sqaureSum += (num % 10)**2
+                num //= 10
+                
+            num = sqaureSum
+            chain.add(num)
+            
+        if num in end89:
+            end89.update(chain)
+        else:
+            end1.update(chain)
+    
+    return len(end89)
+
+
+print(squareDigitChainsBrute(10000000))
+print(squareDigitChains(10000000))
