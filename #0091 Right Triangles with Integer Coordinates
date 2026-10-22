@@ -1,0 +1,58 @@
+import math
+import itertools
+"""
+The points P(x1, y1) and Q(x2, y2) are plotted at integer coordinates and are joined to the origin, O(0, 0), to form triangle OPQ.
+
+There are exactly fourteen triangles containing a right angle that can be formed when each coordinate lies between 0 and 2 inclusive; that is, 0 ≤ x1, y1, x2, y2 ≤ 2.
+
+Given that 0 ≤ x1, y1, x2, y2 ≤ 50, how many right triangles can be formed?
+
+ANSWER: 14234
+"""
+
+# Time: O(n^4), Space: O(n^4)
+def rightTriangles(n):
+    grid = {i for i in range(n+1)}
+    origin = (0,0)
+    
+    coordinates = list(itertools.product(grid, repeat=2))
+    coordinates.remove(origin)
+    pairs = list(itertools.combinations(coordinates, 2))
+    
+    triangles = 0
+    
+    for point1, point2 in pairs:
+        distances = [math.dist(point1, origin), math.dist(origin, point2), math.dist(point1, point2)]
+        distances.sort()
+        
+        if math.isclose(distances[0]**2 + distances[1]**2, distances[2]**2):
+            triangles += 1
+    
+    return triangles
+
+# Time: O(n^2 log n), Space: O(1)
+def rightTrianglesGCD(n):
+    triangles = 3 * n * n
+
+    for x in range(1, n+1):
+        for y in range(1, n+1):
+            g = math.gcd(x, y)
+            a, b = y // g, x // g
+            
+            low = max(-(x // a), -((n - y) // b))
+            high = min((n - x) // a, y // b)
+
+            count = max(0, high - low + 1)
+            if low <= 0 <= high:
+                count -= 1
+
+            triangles += count
+
+    return triangles
+
+
+print(rightTriangles(2))
+print(rightTrianglesGCD(2))
+
+print(rightTriangles(50))
+print(rightTrianglesGCD(50))
